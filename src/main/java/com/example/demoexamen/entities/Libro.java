@@ -2,6 +2,7 @@ package com.example.demoexamen.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -52,6 +53,13 @@ public class Libro implements Serializable {
         joinColumns = { @JoinColumn(name = "libro_id")},
         inverseJoinColumns = { @JoinColumn(name = "autor_id")
     })
-    private Set<Autor> autores;
+    @Builder.Default
+    private Set<Autor> autores = new HashSet<>();
 
+    public void addAutor(Autor autor) {
+        this.autores.add(autor);
+        autor.getLibros().add(this);
+    }
+    
+    // Autor autor = this.autores.stream().filter(a -> a.getId() == autorId).findFirst().orElse(null);
 }
