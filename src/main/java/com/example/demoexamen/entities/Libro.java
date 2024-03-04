@@ -61,5 +61,12 @@ public class Libro implements Serializable {
         autor.getLibros().add(this);
     }
     
-    // Autor autor = this.autores.stream().filter(a -> a.getId() == autorId).findFirst().orElse(null);
+    // Metodo para eliminar el autor de un libro
+    public void deleteAutor(int autorId) {
+        Autor autor = this.autores.stream().filter(p -> p.getId() == autorId).findFirst().orElse(null);
+        if (autor != null) {
+          this.autores.remove(autor); // eliminas el autor
+          autor.getLibros().remove(this); // eliminas el autor del libro
+        }
+    }
 }
