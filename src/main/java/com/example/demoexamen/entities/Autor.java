@@ -52,9 +52,18 @@ public class Autor implements Serializable {
         return libros;
       }
     
-      public void setProductos(Set<Libro> libros) {
+    public void setProductos(Set<Libro> libros) {
         this.libros = libros;
       }  
+
+    // Metodo para eliminar el libro de un autor
+    public void deleteLibro(int libroId) {
+      Libro libro = this.libros.stream().filter(p -> p.getId() == libroId).findFirst().orElse(null);
+      if (libro != null) {
+        this.libros.remove(libro); // eliminas el libro
+        libro.getAutores().remove(this); // eliminas el libro del autor
+      }
+  }
 
 
 }

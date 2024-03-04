@@ -15,6 +15,7 @@ public interface LibroService {
     public List<Libro> findAll(Sort sort);
     public List<Libro> findAll();
     public Libro findById(int id);
+    List<Libro> findLibrosByAutorId(int id);
     public Libro save(Libro libro);
     public void delete(Libro libro);
 

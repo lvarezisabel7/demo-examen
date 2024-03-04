@@ -9,5 +9,6 @@ import java.util.List;
 public interface LibroDao extends JpaRepository<Libro, Integer> {
 
     Libro findById(int id);
+    List<Libro> findLibrosByAutoresId(int id);
 
 }

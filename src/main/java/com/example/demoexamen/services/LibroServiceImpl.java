@@ -48,6 +48,11 @@ public class LibroServiceImpl implements LibroService{
         libroDao.delete(libro);
     }
 
+    @Override
+    public List<Libro> findLibrosByAutorId(int id) {
+        return libroDao.findLibrosByAutoresId(id);
+    }
+
     
 
 }
