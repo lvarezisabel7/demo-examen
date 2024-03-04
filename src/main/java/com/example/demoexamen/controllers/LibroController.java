@@ -1,11 +1,16 @@
 package com.example.demoexamen.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,11 +39,11 @@ public class LibroController {
     private final AutorService autorService;
 
     // Metodo para recuperar todos los libros correspondientes a un autor
-     @GetMapping("/autores/{autorId}/libros")
+    @GetMapping("/autores/{autorId}/libros")
     public ResponseEntity<List<Libro>> getAllLibrosByAutorId(
         @PathVariable(value = "autorId") int autorId) {
 
-            Autor autor = autorService.findById(autorId);
+            Autor autor = autorService.findAutorById(autorId);
             if(autor == null) {
                 throw new ResourceNotFoundException("Not found Autor with Id = " + autorId);
             } 
@@ -64,7 +69,30 @@ public class LibroController {
         }
 
     // Metodo para recuperar los libros con paginacion y ordenamiento
-    
+    @GetMapping("/libros")
+    public ResponseEntity<List<Libro>> findAll(
+        @RequestParam(name = "page", required = false) Integer page,
+        @RequestParam(name = "size", required = false) Integer size) {
+
+            ResponseEntity<List<Libro>> responseEntity = null;
+            Sort sortByName = Sort.by("titulo");
+            List<Libro> libros = new ArrayList<>();
+
+            // comprobamos si se han enviado page y size
+        if (page != null && size != null) { // si esta condicion se cumple es que quieren el producto paginado
+            // queremos devolver los productos paginados
+            Pageable pageable = PageRequest.of(page, size, sortByName);
+            Page<Libro> pageLibros = libroService.findAll(pageable);
+            libros = pageLibros.getContent();
+            responseEntity = new ResponseEntity<List<Libro>>(libros, HttpStatus.OK);
+        } else {
+            libros = libroService.findAll(sortByName);
+            responseEntity = new ResponseEntity<List<Libro>>(libros, HttpStatus.OK);
+
+        }
+
+        return responseEntity;
+    }
     
     // Metodo para añadir un autor a un libro
     @PostMapping("/libros/{libroId}/autores")
@@ -127,7 +155,7 @@ public class LibroController {
 
             try {
                 // Verificar si el autor con el id proporcionado existe
-                Autor autor = autorService.findById(autorId);
+                Autor autor = autorService.findAutorById(autorId);
                 if(autor == null){
                     String errorMessage = "No se encontró el autor con id " + autorId;
                     responseMap.put("errorMessage", errorMessage);

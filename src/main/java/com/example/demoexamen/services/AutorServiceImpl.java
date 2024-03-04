@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.demoexamen.dao.AutorDao;
@@ -24,8 +27,8 @@ public class AutorServiceImpl implements AutorService {
     }
 
     @Override
-    public Autor findById(int id) {
-        return autorDao.findById(id).get();
+    public Autor findAutorById(int id) {
+        return autorDao.findAutorById(id);
     }
 
     @Override
@@ -62,4 +65,16 @@ public class AutorServiceImpl implements AutorService {
     return false; // El autor no está asociado al libro
 
     }
+
+    @Override
+    public Page<Autor> findAll(Pageable pageable) {
+        return autorDao.findAll(pageable);
+    }
+
+    @Override
+    public List<Autor> findAll(Sort sort) {
+        return autorDao.findAll(sort);
+    }
+
+    
 }

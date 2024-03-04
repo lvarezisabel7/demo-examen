@@ -1,11 +1,13 @@
 package com.example.demoexamen.services;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import com.example.demoexamen.entities.Autor;
 import com.example.demoexamen.entities.Libro;
 
 public interface LibroService {
@@ -18,5 +20,6 @@ public interface LibroService {
     List<Libro> findLibrosByAutorId(int id);
     public Libro save(Libro libro);
     public void delete(Libro libro);
+    List<Libro> findLibrosByAutorAndFechaPublicacionAfterOrEqual(Autor autor, LocalDate date);
 
 }

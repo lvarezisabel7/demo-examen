@@ -1,11 +1,18 @@
 package com.example.demoexamen.controllers;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demoexamen.entities.Autor;
@@ -31,6 +39,32 @@ public class AutorController {
 
     private final AutorService autorService;
     private final LibroService libroService;
+
+    // Metodo para recuperar los libros con paginacion y ordenamiento
+    @GetMapping("/autores")
+    public ResponseEntity<List<Autor>> findAll(
+        @RequestParam(name = "page", required = false) Integer page,
+        @RequestParam(name = "size", required = false) Integer size) {
+
+            ResponseEntity<List<Autor>> responseEntity = null;
+            Sort sortByName = Sort.by("nombre");
+            List<Autor> autores = new ArrayList<>();
+
+            // comprobamos si se han enviado page y size
+        if (page != null && size != null) { // si esta condicion se cumple es que quieren el producto paginado
+            // queremos devolver los productos paginados
+            Pageable pageable = PageRequest.of(page, size, sortByName);
+            Page<Autor> pageAutores = autorService.findAll(pageable);
+            autores = pageAutores.getContent();
+            responseEntity = new ResponseEntity<List<Autor>>(autores, HttpStatus.OK);
+        } else {
+            autores = autorService.findAll(sortByName);
+            responseEntity = new ResponseEntity<List<Autor>>(autores, HttpStatus.OK);
+
+        }
+
+        return responseEntity;
+    }
 
     // Metodo para recuperar todos los autores de un libro
     @GetMapping("/libros/{libroId}/autores")
@@ -51,7 +85,7 @@ public class AutorController {
     public ResponseEntity<Autor> getLibroWithAutores(
         @PathVariable(value = "autorId") int autorId) {
 
-            Autor autor = autorService.findById(autorId);
+            Autor autor = autorService.findAutorById(autorId);
             if(autor == null) {
                 throw new ResourceNotFoundException("Not found Autor with Id = " + autorId);
             } else {
@@ -62,6 +96,24 @@ public class AutorController {
             
         }
 
+    // Metodo para recuperar los libros de un autor con fecha de publicacion post o igual a la
+    // fecha especificada
+    @GetMapping("/autores/{autorId}/libros/fecha-publicacion/{date}")
+    public ResponseEntity<List<Libro>> getLibrosWithDate(
+        @PathVariable(value = "autorId") int autorId,
+        @PathVariable(value = "date") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date) {
+            
+            Autor autor = autorService.findAutorById(autorId);
+            if(autor == null) {
+                throw new ResourceNotFoundException("Not found Autor with Id = " + autorId);
+            } 
+        
+            List<Libro> libros = libroService.findLibrosByAutorAndFechaPublicacionAfterOrEqual(autor, date);
+        
+            return new ResponseEntity<>(libros, HttpStatus.OK);
+        }
+
+
 
     // Metodo para actualizar un autor por su id
     @PutMapping("/autores/{autorId}")
@@ -69,7 +121,7 @@ public class AutorController {
         @PathVariable(value = "autorId") int autorId,
         @RequestBody Autor autor) {
             
-           Autor autorUpdate = autorService.findById(autorId);
+           Autor autorUpdate = autorService.findAutorById(autorId);
             if(autorUpdate == null) {
                 throw new ResourceNotFoundException("Not found Autor with Id = " + autorId);
             } 
@@ -91,7 +143,7 @@ public class AutorController {
             ResponseEntity<Map<String, Object>> responseEntity = null;
 
             try {
-                Autor autor = autorService.findById(autorId);
+                Autor autor = autorService.findAutorById(autorId);
                 if (autor == null) {
                     String errorMessage = "No se encontró el autor con id " + autorId;
                     responseMap.put("errorMessage", errorMessage);
