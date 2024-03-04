@@ -1,6 +1,7 @@
 package com.example.demoexamen.entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,7 +45,16 @@ public class Autor implements Serializable {
         }, 
         mappedBy = "autores")
     @JsonIgnore
-    private Set<Libro> libros;
+    @Builder.Default
+    private Set<Libro> libros = new HashSet<>();
+
+    public Set<Libro> getLibros() {
+        return libros;
+      }
+    
+      public void setProductos(Set<Libro> libros) {
+        this.libros = libros;
+      }  
 
 
 }
